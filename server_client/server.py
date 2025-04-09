@@ -1,5 +1,5 @@
 import socket
-from do_connect import connect_to_network
+from server_client.do_connect import connect_to_network
 
 
 SERVER_IP = connect_to_network()
