@@ -3,25 +3,21 @@ import time
 from machine import Pin
 import network
 import socket
+from server_client import server
 
 
-def web_page():
-    html = """<html>
-<body>
-    <h2>Raspberry Pi Pico Web Server with RGB LED</h2>
-    <p>
-    Current RGB at the LED = """"""
-    </p>
-    <p>
-    Set the color of the RGB LED at the server<br>
-    <form>
-    <label for="rgb_color">Enter RGB Color in Hex including prefix 0x (e.g., 0x4321ef)</label>
-    <input type="text" id="rgb_color" name="RGB_COLOR">
-    <input type="submit" value="Submit">
-    </form>
-    </p>
-</body>
-</html>"""
+def load_index_html():
+    try:
+        with open("index.html", "r") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "<h1>Error Loading HTML</h1>"
+
+
+def web_page(inside, outside):
+    html = load_index_html()
+    html = html.replace("{{inside}}", str(inside))
+    html = html.replace("{{outside}}", str(outside))
     return html
 
 
@@ -30,6 +26,19 @@ def core0_main():
 
 
 def core1_server():
+    UDPServer, BUFFER_SIZE = server.server_stuff()
+
+    while True:
+        conn, addr = UDPServer.accept()
+        print("Got a connection from", addr)
+        request = conn.recv(BUFFER_SIZE)
+        request = str(request)
+
+        response = web_page()
+        conn.send('HTTP/1.1 200 OK\nContent-Type: text/html\nConnection: close\n\n')
+        conn.sendall(response)
+        conn.close()
+
     pass
 
 

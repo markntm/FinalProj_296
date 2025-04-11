@@ -1,14 +1,16 @@
 import network
 import time
-import urequests
+from secret import secrets
 
 
 def connect_to_network():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    wlan.connect("SSID", "PASSWORD")
+    wlan.connect(secrets["SSID"], secrets["PASSWORD"])
+
     while not wlan.isconnected:
         print("connecting to network...")
+        time.sleep(0.5)
 
     if wlan.isconnected():
         print("Connection Successful.")
