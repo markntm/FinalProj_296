@@ -35,13 +35,13 @@ class Photoresistor:
         if light_level > self.threshold:
             if not self.is_day:
                 self.sunrise_time = current_time
-                print('sunrise detected:', utime.strftime("%H:%M:%S", current_time))
+                print('sunrise detected, updating sunrise:', utime.strftime("%H:%M:%S", current_time))
             self.is_day = True
 
         else:
             if self.is_day:
                 self.sunset_time = current_time
-                print('sunset detected:', utime.strftime("%H:%M:%S", current_time))
+                print('sunset detected, updating sunset:', utime.strftime("%H:%M:%S", current_time))
             self.is_day = False
 
 
