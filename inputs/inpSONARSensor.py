@@ -35,7 +35,7 @@ class SONARSensor:
         distance_cm = (duration * 0.0342) / 2
         return round(distance_cm, 2)
 
-    def initIdleDistance(self, n=10, delay_s=0.1, tolerance_cm=2.0):
+    def init_idle_distance(self, n=10, delay_s=0.1, tolerance_cm=2.0):
         readings = []
 
         for i in range(n):
@@ -68,7 +68,7 @@ class Gate:
         self.inside_count = 0
         self.outside_count = 0
 
-    def update(self, delay_ms = 500):
+    def update(self, delay_ms=500):
         if time.ticks_diff(time.ticks_ms(), self.last_event_time) < delay_ms:
             return
 
@@ -101,7 +101,7 @@ class Gate:
 
     def calibrate_sensors(self):
         while True:
-            if self.innerSensor.initIdleDistance() and self.outerSensor.initIdleDistance():
+            if self.innerSensor.init_idle_distance() and self.outerSensor.init_idle_distance():
                 return
 
     def get_chicken_count(self):
