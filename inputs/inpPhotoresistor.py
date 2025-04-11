@@ -1,5 +1,6 @@
 from machine import Pin, ADC
 import utime
+import time
 
 
 class Photoresistor:
@@ -10,11 +11,30 @@ class Photoresistor:
         self.sunrise_time = None
         self.sunset_time = None
 
-    def read_light(self):
+    def read(self):
         return self.sensor.read_u16()
 
     def time_to_seconds(self, time):
         return time[3] * 3600 + time[4] * 60 + time[5]
+
+    def init_threshold(self, n=10, delay_s=0.1, tolerance=100):
+        readings = []
+
+        for i in range(n):
+            light_level = self.read()
+            readings.append(light_level)
+            time.sleep(delay_s)
+
+        avg = sum(readings) / len(readings)
+        deviations = [abs(r - avg) for r in readings]
+
+        if all(dev < tolerance for dev in deviations):
+            self.threshold = round(avg, 2)
+            print("Light level threshold set to", self.threshold, ".")
+            return True
+        else:
+            print("Light level unstable. Try again.")
+            return False
 
     def check_alert(self, current_time):
         """Check if current time is sunrise or sunset and send alarm to user
@@ -27,7 +47,7 @@ class Photoresistor:
 
     def update(self):
         """Run Frequently"""
-        light_level = self.read_light()
+        light_level = self.read()
         current_time = utime.localtime()
 
         self.check_alert(self.time_to_seconds(current_time))
