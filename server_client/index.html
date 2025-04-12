@@ -2,22 +2,52 @@
 <html lang="">
 
 <head>
-    <title>Chicken Tracker</title>
+    <title>Chicken Coup Tracker</title>
 </head>
 
 <body>
-    <h2>Welcome to the Chicken Coop Tracker</h2>
-    <p>Current count inside: {{inside}}</p>
-    <p>Current count outside: {{outside}}</p>
+    <h2>Chicken Tracker</h2>
+    <p>Current count inside: {{ inside }}</p>
+    <p>Current count outside: {{ outside }}</p>
+    <p>Gate Height: {{ height }} cm</p>
+    <p>Chicken Height: {{ chicken-height }} cm</p>
+    <form action="/calibrate_sonar"><button type="submit">Calibrate Gate Idle Distance</button></form>
+    <br>
+    <form>
+        <label for="chicken-height">Set Chicken Height</label>
+        <input type="text" id="chicken-height" name="CHICKEN_HEIGHT">
+        <input type="submit" value="submit">
+    </form>
+    <br>
+    <form>
+        <label for="reset_chicken_count">Reset Number of Chickens Inside</label>
+        <input type="text" id="reset_chicken_count" name="CHICKEN_COUNT">
+        <input type="submit" value="submit">
+    </form>
+</body>
+
+<body>
+    <h2>Water Level Tracker</h2>
+    <p>Current State: {{ state }}</p>
+    <p>Current Water Level: {{ water-level }} cm</p>
+    <p>Low Water Level: {{ low }} cm</p>
+    <p>Empty Water Level: {{ empty }} cm</p>
+    <form action="/calibrate_low_water_level"><button type="submit">Calibrate Low Water Threshold</button></form>
+    <br>
+    <form action="/calibrate_empty_water_level"><button type="submit">Calibrate Empty Water Threshold</button></form>
+    <br>
 </body>
 
 <body>
     <h2>
-        Raspberry Pi Pico Sensor Control
+        Light Level Tracker
     </h2>
-    <form action="/init_photo"><button type="submit">Init Photoresistor</button></form>
-    <form action="/calibrate_water"><button type="submit">Calibrate Water Level</button></form>
-    <form action="/calibrate_sonar"><button type="submit">Calibrate Sonar</button></form>
+    <p>Currently Daytime: {{ is-day }}</p>
+    <p>Sunrise Time: {{ sunrise-time }}</p>
+    <p>Sunset Time: {{ sunset-time }}</p>
+    <p>Day-Night Threshold: {{ light-threshold }}</p>
+    <form action="/init_photo"><button type="submit">Calibrate Day-Night Threshold</button></form>
+    <br>
 </body>
 
 </html>
