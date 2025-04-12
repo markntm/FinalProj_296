@@ -103,6 +103,7 @@ class Gate:
         while True:
             if self.innerSensor.init_idle_distance() and self.outerSensor.init_idle_distance():
                 return
+            print("Retrying Gate Calibration...")
 
     def get_chicken_count(self):
         print("Inside:", self.inside_count, "| Outside:", self.outside_count)

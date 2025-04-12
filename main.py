@@ -18,31 +18,8 @@ pins = {
 }
 
 
-def load_index_html():
-    """Converting index.html to response format"""
-    try:
-        with open("index.html", "r") as f:
-            return f.read()
-    except FileNotFoundError:
-        return "<h1>Error Loading HTML</h1>"
-
-
-def web_page(inside, outside):
-    """Creating response"""
-    html = load_index_html()
-    html = html.replace("{{inside}}", str(inside))
-    html = html.replace("{{outside}}", str(outside))
-    return html
-
-
-def core0_main():
+def core0_main(button, photo_resistor, water_level, gate):
     """Do Readings"""
-    button_1 = inpButton.Button(pins['button1 pin'])
-    photo_resistor = inpPhotoresistor.Photoresistor(pins['photo-resistor pin'])
-    water_level = inpWaterLevelSensor.WaterLevelSensor(pins['water-level pin'])
-    gate = inpSONARSensor.Gate(pins['sonar inner-TRIG pin'], pins['sonar inner-ECHO pin'],
-                               pins['sonar outer-TRIG pin'], pins['sonar outer-ECHO pin'])
-
     gate.calibrate_sensors()
 
     while True:
@@ -53,24 +30,16 @@ def core0_main():
 
 def core1_server():
     """Onboard Program to Communicate with client over Wi-Fi"""
-    UDPServer, BUFFER_SIZE = server.server_stuff()
-
-    while True:
-        conn, addr = UDPServer.accept()
-        print("Got a connection from", addr)
-        request = conn.recv(BUFFER_SIZE)
-        request = str(request)
-
-
-
-        response = web_page()
-        conn.send('HTTP/1.1 200 OK\nContent-Type: text/html\nConnection: close\n\n')
-        conn.sendall(response)
-        conn.close()
-
+    server.run_server(photo_resistor, water_level, )
     pass
 
 
 if __name__ == '__main__':
-    _thread.start_new_thread(core1_server, ())
-    core0_main()
+    button_1 = inpButton.Button(pins['button1 pin'])
+    photo_resistor = inpPhotoresistor.Photoresistor(pins['photo-resistor pin'])
+    water_level = inpWaterLevelSensor.WaterLevelSensor(pins['water-level pin'])
+    gate = inpSONARSensor.Gate(pins['sonar inner-TRIG pin'], pins['sonar inner-ECHO pin'],
+                               pins['sonar outer-TRIG pin'], pins['sonar outer-ECHO pin'])
+
+    _thread.start_new_thread(core1_server, (photo_resistor, water_level, gate))
+    core0_main(button_1, photo_resistor, water_level, gate)
