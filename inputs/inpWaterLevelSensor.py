@@ -6,7 +6,7 @@ class WaterLevelSensor:
     def __init__(self, pin, empty_threshold=1000, low_threshold=5000):
         self.sensor = ADC(pin)
         self.empty_threshold = empty_threshold
-        self.low_threshold = low_threshold
+        self.low_threshold = low_threshold  # set to enum
         self.level = 0
         self.status = "unknown"
 
