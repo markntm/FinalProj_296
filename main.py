@@ -1,8 +1,4 @@
 import _thread
-import time
-from machine import Pin
-import network
-import socket
 from server_client import server
 from inputs import inpButton, inpPhotoresistor, inpSONARSensor, inpWaterLevelSensor
 
