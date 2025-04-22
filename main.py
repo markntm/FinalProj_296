@@ -30,7 +30,8 @@ def core0_main(button, photo_resistor, water_level, gate):
 
 def core1_server():
     """Onboard Program to Communicate with client over Wi-Fi"""
-    server.run_server(photo_resistor, water_level, )
+    server.setup_devices(photo_resistor, water_level, gate)
+    server.run_server()
     pass
 
 
