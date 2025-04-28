@@ -1,4 +1,5 @@
 import _thread
+import time
 from server_client import server
 from inputs import inpButton, inpPhotoresistor, inpSONARSensor, inpWaterLevelSensor
 
@@ -22,6 +23,7 @@ def core0_main(button, photo_resistor, water_level, gate):
         photo_resistor.update()
         water_level.update()
         gate.update()
+        time.sleep(0.5)
 
 
 def core1_server():
