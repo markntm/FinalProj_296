@@ -86,8 +86,22 @@ def serve(server_socket):
             print("Waiting for client...")
             client, addr = server_socket.accept()
             print("Client connected from", addr)
-            request = client.recv(1024)
-            print("Request received")
+            request = client.recv(1024).decode('etf-8')
+            print(f"Request received: \n{request}")
+
+            """
+            # Process GET requests manually
+            if "GET /init_photo" in request:
+                photo_resistor.init_threshold()
+            elif "GET /calibrate_low_water_level" in request:
+                water_level.init_low_threshold()
+            elif "GET /calibrate_empty_water_level" in request:
+                water_level.init_empty_threshold()
+            elif "GET /calibrate_sonar" in request:
+                gate.calibrate_sensors()
+            else:
+                pass
+            """
 
             html = webpage()
 
@@ -104,52 +118,15 @@ def serve(server_socket):
 
 
 def run_server():
+    print("Core 1 Server: On")
     SERVER_IP = connect_to_network()
 
     if SERVER_IP is None:
         print("No Wi-Fi connection. Server cannot start.")
+        print("Core 1 Server: Off")
         return  # Exit the server function safely
 
     server_socket = open_socket()
     print(f"Listening on http://{SERVER_IP}")
     serve(server_socket)
-
-    """
-    while True:
-        try:
-            conn, addr = server_socket.accept()
-            print('Got a connection from', addr)
-
-            request = conn.recv(BUFFER_SIZE).decode('utf-8')
-            print("Request:", request)
-
-            # Process GET requests manually
-            if "GET /init_photo" in request:
-                photo_resistor.init_threshold()
-            elif "GET /calibrate_low_water_level" in request:
-                water_level.init_low_threshold()
-            elif "GET /calibrate_empty_water_level" in request:
-                water_level.init_empty_threshold()
-            elif "GET /calibrate_sonar" in request:
-                gate.calibrate_sensors()
-            else:
-                pass
-
-            # Build the dynamic webpage
-            response = web_page()
-
-            # Send HTTP headers + page
-            conn.send('HTTP/1.1 200 OK\r\n')
-            conn.send('Content-Type: text/html\r\n')
-            conn.send('Connection: close\r\n')
-            conn.sendall('\r\n' + response)
-
-        except Exception as e:
-            print("Connection Error:", e)
-
-        finally:
-            try:
-                conn.close()
-            except Exception as e:
-                print("Error Closing Connection:", e)
-    """
+    print("Core 1 Server: Off")

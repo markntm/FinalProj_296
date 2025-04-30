@@ -17,13 +17,16 @@ pins = {
 
 def core0_main(button, photo_resistor, water_level, gate):
     """Do Readings"""
+    print("Core 0 Reading: On")
     gate.calibrate_sensors()
 
     while True:
         photo_resistor.update()
         water_level.update()
         gate.update()
-        time.sleep(0.5)
+        time.sleep(3)  # change for more frequent reading after testing server
+    # make a safe way to exit program
+    # print("Core 0 Reading: Off")
 
 
 def core1_server():
