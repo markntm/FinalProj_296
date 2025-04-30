@@ -1,5 +1,4 @@
 import socket
-import time
 from server_client.do_connect import connect_to_network
 
 # server consts
@@ -46,7 +45,7 @@ def load_index_html():
         return "<h1>Error Loading HTML</h1>"
 
 
-def web_page():
+def webpage():
     """Creating response by filling in sensor values."""
     html = load_index_html()
     for key, value in {
@@ -67,17 +66,55 @@ def web_page():
     return html
 
 
+def open_socket():
+    address = socket.getaddrinfo("0.0.0.0", 80)[0][-1]
+    s = socket.socket()
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        s.bind(address)
+        s.listen(1)
+        return s
+    except OSError as e:
+        print("Socket error:", e)
+        s.close()
+        raise
+
+
+def serve(server_socket):
+    try:
+        while True:
+            print("Waiting for client...")
+            client, addr = server_socket.accept()
+            print("Client connected from", addr)
+            request = client.recv(1024)
+            print("Request received")
+
+            html = webpage()
+
+            client.send("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n")
+            client.sendall(html)
+            client.close()
+    except KeyboardInterrupt:
+        print("Server stopped manually.")
+    except Exception as e:
+        print("Server error:", e)
+    finally:
+        server_socket.close()
+        print("Socket closed.")
+
+
 def run_server():
     SERVER_IP = connect_to_network()
 
-    # Create a TCP socket
-    addr = socket.getaddrinfo(SERVER_IP, SERVER_PORT)[0][-1]
-    server_socket = socket.socket()
-    server_socket.bind(addr)
-    server_socket.listen(1)
+    if SERVER_IP is None:
+        print("No Wi-Fi connection. Server cannot start.")
+        return  # Exit the server function safely
 
-    print(f"Server running at http://{SERVER_IP}:{SERVER_PORT}")
+    server_socket = open_socket()
+    print(f"Listening on http://{SERVER_IP}")
+    serve(server_socket)
 
+    """
     while True:
         try:
             conn, addr = server_socket.accept()
@@ -115,3 +152,4 @@ def run_server():
                 conn.close()
             except Exception as e:
                 print("Error Closing Connection:", e)
+    """

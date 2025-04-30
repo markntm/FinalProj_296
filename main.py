@@ -30,7 +30,6 @@ def core1_server():
     """Onboard Program to Communicate with client over Wi-Fi"""
     server.setup_devices(photo_resistor, water_level, gate)
     server.run_server()
-    pass
 
 
 if __name__ == '__main__':
@@ -40,5 +39,5 @@ if __name__ == '__main__':
     gate = inpSONARSensor.Gate(pins['sonar inner-TRIG pin'], pins['sonar inner-ECHO pin'],
                                pins['sonar outer-TRIG pin'], pins['sonar outer-ECHO pin'])
 
-    _thread.start_new_thread(core1_server, (photo_resistor, water_level, gate))
+    _thread.start_new_thread(core1_server, ())
     core0_main(button_1, photo_resistor, water_level, gate)
