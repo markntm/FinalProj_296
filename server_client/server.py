@@ -52,7 +52,7 @@ def webpage():
         "{{ inside }}": str(sensor_cache["inside"]),
         "{{ outside }}": str(sensor_cache["outside"]),
         "{{ height }}": str(sensor_cache["height"]),
-        "{{ chicken-height }}": str(sensor_cache["chicken_height"]),
+        "{{ chicken_height }}": str(sensor_cache["chicken_height"]),
         "{{ state }}": str(sensor_cache["state"]),
         "{{ water-level }}": str(sensor_cache["water_level"]),
         "{{ low }}": str(sensor_cache["low"]),
@@ -86,22 +86,26 @@ def serve(server_socket):
             print("Waiting for client...")
             client, addr = server_socket.accept()
             print("Client connected from", addr)
-            request = client.recv(1024).decode('etf-8')
+            request = client.recv(1024).decode('utf-8')
             print(f"Request received: \n{request}")
 
-            """
-            # Process GET requests manually
-            if "GET /init_photo" in request:
-                photo_resistor.init_threshold()
-            elif "GET /calibrate_low_water_level" in request:
-                water_level.init_low_threshold()
-            elif "GET /calibrate_empty_water_level" in request:
-                water_level.init_empty_threshold()
-            elif "GET /calibrate_sonar" in request:
-                gate.calibrate_sensors()
-            else:
-                pass
-            """
+            # Handle the GET request paths
+            if "GET /calibrate_sonar" in request:
+                print("Calibrating sonar sensors...")
+                if gate:
+                    gate.calibrate_sensors()
+
+                    # Refresh data (assumes gate.update() updates internal values)
+            if gate:
+                gate.update()
+                # Optionally update sensor_cache with gate values
+                try:
+                    sensor_cache["height"] = gate.height
+                    sensor_cache["chicken_height"] = gate.chicken_height
+                    sensor_cache["inside"] = gate.count_inside
+                    sensor_cache["outside"] = gate.count_outside
+                except Exception as e:
+                    print("Error updating sensor_cache:", e)
 
             html = webpage()
 
