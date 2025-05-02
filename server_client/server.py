@@ -36,7 +36,7 @@ def setup_devices(pr, wl, g):
     gate = g
 
 
-def load_index_html():
+def load_index_html():  # seeing if it can be replaced
     """Converting index.html to response format"""
     try:
         with open("index.html", "r") as f:
@@ -45,7 +45,7 @@ def load_index_html():
         return "<h1>Error Loading HTML</h1>"
 
 
-def webpage():
+def old_webpage():  # seeing if it can be replaced
     """Creating response by filling in sensor values."""
     html = load_index_html()
     for key, value in {
@@ -63,6 +63,26 @@ def webpage():
         "{{ light-threshold }}": str(sensor_cache["light_threshold"]),
     }.items():
         html = html.replace(key, str(value))
+    return html
+
+
+def webpage():
+    html = "<html><body>"
+    html += "<h2>Chicken Tracker</h2>"
+    html += "<p>Current count inside: " + str(sensor_cache["inside"]) + "</p>"
+    html += "<p>Current count outside: " + str(sensor_cache["outside"]) + "</p>"
+    html += "<p>Gate Height: " + str(sensor_cache["height"]) + " cm</p>"
+    html += "<p>Chicken Height: " + str(sensor_cache["chicken_height"]) + " cm</p>"
+
+    html += """<form action="/calibrate_sonar"><button type="submit">Calibrate Gate Idle Distance</button></form><br>"""
+    html += """<form><label for="chicken_height">Set Chicken Height</label>
+                   <input type="text" id="chicken_height" name="CHICKEN_HEIGHT">
+                   <input type="submit" value="submit"></form><br>"""
+    html += """<form><label for="reset_chicken_count">Reset Number of Chickens Inside</label>
+                   <input type="text" id="reset_chicken_count" name="CHICKEN_COUNT">
+                   <input type="submit" value="submit"></form><br>"""
+
+    html += "</body></html>"
     return html
 
 
@@ -89,7 +109,41 @@ def serve(server_socket):
             request = client.recv(1024).decode('utf-8')
             print(f"Request received: \n{request}")
 
-            # Handle the GET request paths
+            # reads request
+            request_line = request.split('\r\n')[0]
+            print(f"Request line: {request_line}")
+
+            # Parse GET parameters if present (key-value pair param)
+            if "GET /?" in request_line:
+                param_string = request_line.split("GET /?")[1].split(" ")[0]
+                param_pairs = param_string.split("&")
+                params = {}
+                for pair in param_pairs:
+                    if '=' in pair:
+                        key, value = pair.split('=', 1)
+                        params[key] = value
+
+                # Process CHICKEN_HEIGHT
+                if "CHICKEN_HEIGHT" in params:
+                    try:
+                        height = int(params["CHICKEN_HEIGHT"])
+                        print("New chicken height:", height)
+                        if gate:
+                            gate.chickenHeight = height
+                    except:
+                        print("Invalid CHICKEN_HEIGHT input")
+
+                # Process CHICKEN_COUNT
+                if "CHICKEN_COUNT" in params:
+                    try:
+                        count = int(params["CHICKEN_COUNT"])
+                        print("Resetting chicken count to:", count)
+                        if gate:
+                            gate.reset_chicken_count(count)
+                    except:
+                        print("Invalid CHICKEN_COUNT input")
+
+            # Handle the GET request paths (button)
             if "GET /calibrate_sonar" in request:
                 print("Calibrating sonar sensors...")
                 if gate:
@@ -100,10 +154,10 @@ def serve(server_socket):
                 gate.update()
                 # Optionally update sensor_cache with gate values
                 try:
-                    sensor_cache["height"] = gate.height
-                    sensor_cache["chicken_height"] = gate.chicken_height
-                    sensor_cache["inside"] = gate.count_inside
-                    sensor_cache["outside"] = gate.count_outside
+                    sensor_cache["height"] = gate.innerSensor.idle_distance
+                    sensor_cache["chicken_height"] = gate.chickenHeight
+                    sensor_cache["inside"] = gate.inside_count
+                    sensor_cache["outside"] = gate.outside_count
                 except Exception as e:
                     print("Error updating sensor_cache:", e)
 

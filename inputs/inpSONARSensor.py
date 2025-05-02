@@ -60,8 +60,8 @@ class Gate:
     def __init__(self, inner_trig_pin, inner_echo_pin, outer_trig_pin, outer_echo_pin):
         self.innerSensor = SONARSensor(inner_trig_pin, inner_echo_pin)
         self.outerSensor = SONARSensor(outer_trig_pin, outer_echo_pin)
-        self.chickenHeightLower_cm = 20
-        self.chickenHeightUpper_cm = 40
+        self.chickenHeight = 20
+        # self.chickenHeightUpper_cm = 40
 
         self.last_event_time = 0
         self.last_state = None
@@ -79,8 +79,8 @@ class Gate:
             print("Inner distance unstable. Try again.")
             return
 
-        inner_triggered = inner_distance < (self.innerSensor.idle_distance - self.chickenHeightLower_cm)
-        outer_triggered = outer_distance < (self.outerSensor.idle_distance - self.chickenHeightLower_cm)
+        inner_triggered = inner_distance < (self.innerSensor.idle_distance - self.chickenHeight)
+        outer_triggered = outer_distance < (self.outerSensor.idle_distance - self.chickenHeight)
 
         if inner_triggered and not outer_triggered:
             self.last_state = 'A'
