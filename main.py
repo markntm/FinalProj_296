@@ -33,6 +33,19 @@ def core0_main(photo_resistor, water_level, gate, rgb_led, servo, motor_door):
         rgb_led.update()
         servo.update()
         motor_door.update()
+
+        if motor_door:
+            motor_door.update()
+            server.sensor_cache["motor_door_state"] = motor_door.state
+            server.sensor_cache["motor_open_times"] = ", ".join(motor_door.open_times)
+            server.sensor_cache["motor_close_times"] = ", ".join(motor_door.close_times)
+
+        if servo:
+            servo.update()
+            server.sensor_cache["servo_door_state"] = servo.state
+            server.sensor_cache["servo_open_times"] = ", ".join(servo.open_times)
+            server.sensor_cache["servo_close_times"] = ", ".join(servo.close_times)
+
         time.sleep(3)  # change for more frequent reading after testing server
     # make a safe way to exit program
     # print("Core 0 Reading: Off")
@@ -40,7 +53,7 @@ def core0_main(photo_resistor, water_level, gate, rgb_led, servo, motor_door):
 
 def core1_server():
     """Onboard Program to Communicate with client over Wi-Fi"""
-    server.setup_devices(photo_resistor, water_level, gate)
+    server.setup_devices(photo_resistor, water_level, gate, motor_door, servo)
     server.run_server()
 
 

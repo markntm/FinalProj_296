@@ -9,7 +9,8 @@ BUFFER_SIZE = 1024
 photo_resistor = None
 water_level = None
 gate = None
-
+motor = None
+servo = None
 
 # Cached values
 sensor_cache = {
@@ -17,23 +18,35 @@ sensor_cache = {
     "outside": "?",
     "height": "?",
     "chicken_height": "?",
+
     "state": "?",
     "water_level": "?",
     "low": "?",
     "empty": "?",
+
     "is_day": "?",
     "sunrise_time": "?",
     "sunset_time": "?",
-    "light_threshold": "?"
+    "light_threshold": "?",
+
+    "motor_door_state": "?",
+    "motor_open_times": "?",
+    "motor_close_times": "?",
+
+    "servo_door_state": "?",
+    "servo_open_times": "?",
+    "servo_close_times": "?"
 }
 
 
-def setup_devices(pr, wl, g):
+def setup_devices(pr, wl, g, m, s):
     """Link the devices to the server module."""
-    global photo_resistor, water_level, gate
+    global photo_resistor, water_level, gate, motor, servo
     photo_resistor = pr
     water_level = wl
     gate = g
+    motor = m
+    servo = s
 
 
 # delete
@@ -105,6 +118,30 @@ def webpage():
     html += "<p>Day-Night Threshold: " + str(sensor_cache["light_threshold"]) + "</p>"
     html += '<form action="/init_photo"><button type="submit">Calibrate Day-Night Threshold</button></form><br>'
 
+    # Motor door Tracker Section
+    html += "<h2>Motor Door</h2>"
+    html += "<p>Current State: " + str(sensor_cache["motor_door_state"]) + "</p>"
+    html += "<p>Open Times: " + str(sensor_cache["motor_open_times"]) + "</p>"
+    html += "<p>Close Times: " + str(sensor_cache["motor_close_times"]) + "</p>"
+    html += ('<form><label for="motor_open">Set Motor Open Time (HH:MM)</label>'
+             '<input type="text" id="motor_open" name="MOTOR_OPEN">'
+             '<input type="submit" value="submit"></form><br>')
+    html += ('<form><label for="motor_close">Set Motor Close Time (HH:MM)</label>'
+             '<input type="text" id="motor_close" name="MOTOR_CLOSE">'
+             '<input type="submit" value="submit"></form><br>')
+
+    # Servo door Tracker Section
+    html += "<h2>Servo Door</h2>"
+    html += "<p>Current State: " + str(sensor_cache["servo_door_state"]) + "</p>"
+    html += "<p>Open Times: " + str(sensor_cache["servo_open_times"]) + "</p>"
+    html += "<p>Close Times: " + str(sensor_cache["servo_close_times"]) + "</p>"
+    html += ('<form><label for="servo_open">Set Servo Open Time (HH:MM)</label>'
+             '<input type="text" id="servo_open" name="SERVO_OPEN">'
+             '<input type="submit" value="submit"></form><br>')
+    html += ('<form><label for="servo_close">Set Servo Close Time (HH:MM)</label>'
+             '<input type="text" id="servo_close" name="SERVO_CLOSE">'
+             '<input type="submit" value="submit"></form><br>')
+
     html += "</body></html>"
     return html
 
@@ -165,6 +202,22 @@ def serve(server_socket):
                             gate.reset_chicken_count(count)
                     except:
                         print("Invalid CHICKEN_COUNT input")
+
+                if "MOTOR_OPEN" in params and motor:
+                    motor.open_times = [params["MOTOR_OPEN"]]
+                    print("Updated Motor Door open time:", motor.open_times)
+
+                if "MOTOR_CLOSE" in params and motor:
+                    motor.close_times = [params["MOTOR_CLOSE"]]
+                    print("Updated Motor Door close time:", motor.close_times)
+
+                if "SERVO_OPEN" in params and servo:
+                    servo.open_times = [params["SERVO_OPEN"]]
+                    print("Updated Servo Door open time:", servo.open_times)
+
+                if "SERVO_CLOSE" in params and servo:
+                    servo.close_times = [params["SERVO_CLOSE"]]
+                    print("Updated Servo Door close time:", servo.close_times)
 
             # Handle the GET request paths (button)
             if "GET /calibrate_sonar" in request:
