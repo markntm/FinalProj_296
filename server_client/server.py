@@ -36,6 +36,7 @@ def setup_devices(pr, wl, g):
     gate = g
 
 
+# delete
 def load_index_html():  # seeing if it can be replaced
     """Converting index.html to response format"""
     try:
@@ -45,6 +46,7 @@ def load_index_html():  # seeing if it can be replaced
         return "<h1>Error Loading HTML</h1>"
 
 
+# delete
 def old_webpage():  # seeing if it can be replaced
     """Creating response by filling in sensor values."""
     html = load_index_html()
@@ -67,7 +69,9 @@ def old_webpage():  # seeing if it can be replaced
 
 
 def webpage():
-    html = "<html><body>"
+    html = "<html><head><title>Chicken Coup Tracker</title></head><body>"
+
+    # Chicken Tracker Section
     html += "<h2>Chicken Tracker</h2>"
     html += "<p>Current count inside: " + str(sensor_cache["inside"]) + "</p>"
     html += "<p>Current count outside: " + str(sensor_cache["outside"]) + "</p>"
@@ -81,6 +85,25 @@ def webpage():
     html += """<form><label for="reset_chicken_count">Reset Number of Chickens Inside</label>
                    <input type="text" id="reset_chicken_count" name="CHICKEN_COUNT">
                    <input type="submit" value="submit"></form><br>"""
+
+    # Water Level Tracker Section
+    html += "<h2>Water Level Tracker</h2>"
+    html += "<p>Current State: " + str(sensor_cache["state"]) + "</p>"
+    html += "<p>Current Water Level: " + str(sensor_cache["water_level"]) + " cm</p>"
+    html += "<p>Low Water Level: " + str(sensor_cache["low"]) + " cm</p>"
+    html += "<p>Empty Water Level: " + str(sensor_cache["empty"]) + " cm</p>"
+    html += ('<form action="/calibrate_low_water_level">'
+             '<button type="submit">Calibrate Low Water Threshold</button></form><br>')
+    html += ('<form action="/calibrate_empty_water_level">'
+             '<button type="submit">Calibrate Empty Water Threshold</button></form><br>')
+
+    # Light Level Tracker Section
+    html += "<h2>Light Level Tracker</h2>"
+    html += "<p>Currently Daytime: " + str(sensor_cache["is_day"]) + "</p>"
+    html += "<p>Sunrise Time: " + str(sensor_cache["sunrise_time"]) + "</p>"
+    html += "<p>Sunset Time: " + str(sensor_cache["sunset_time"]) + "</p>"
+    html += "<p>Day-Night Threshold: " + str(sensor_cache["light_threshold"]) + "</p>"
+    html += '<form action="/init_photo"><button type="submit">Calibrate Day-Night Threshold</button></form><br>'
 
     html += "</body></html>"
     return html

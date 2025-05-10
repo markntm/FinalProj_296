@@ -48,7 +48,7 @@ class RGBLED:
         self.set_color('off')
         print('blinking stopped')
 
-    def update_LED(self):
+    def update(self):
         """Run Frequently"""
         if not self.blinking:
             return
