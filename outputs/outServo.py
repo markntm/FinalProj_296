@@ -20,12 +20,22 @@ def get_current_time():
         return None
 
 
+def sync_time():
+    try:
+        ntptime.settime()
+        print("Time synced with NTP.")
+    except:
+        print("Failed to sync time.")
+
+
 class TimedServo:
-    def __init__(self, pin, open_times=["06:00", "17:00"], open_duration_s=10, grace_period_s=90):
+    def __init__(self, pin, open_time1="06:00", open_time2="17:00", open_duration_s=10, grace_period_s=90):
         self.servo = PWM(Pin(pin))
         self.servo.freq(50)
 
-        self.open_times = open_times  # List of "HH:MM" strings
+        self.open_time1 = open_time1
+        self.open_time2 = open_time2
+
         self.open_duration_s = open_duration_s
         self.grace_period_s = grace_period_s
 
@@ -43,18 +53,21 @@ class TimedServo:
 
         now_seconds = now[3] * 3600 + now[4] * 60 + now[5]
 
-        # Check if we're within the grace window for any un-triggered time
-        for sched_time in self.open_times:
+        # Check both open_time1 and open_time2
+        for sched_time in [self.open_time1, self.open_time2]:
+            if sched_time in self.last_triggered_times:
+                continue
+
             h, m = map(int, sched_time.split(":"))
             sched_seconds = h * 3600 + m * 60
 
-            if sched_time not in self.last_triggered_times:
-                if 0 <= now_seconds - sched_seconds <= self.grace_period_s:
-                    servo_write(self.servo, 180)
-                    self.is_open = True
-                    self.open_timestamp = time.ticks_ms()
-                    self.last_triggered_times.add(sched_time)
-                    break
+            if 0 <= now_seconds - sched_seconds <= self.grace_period_s:
+                print(f"Servo opening at scheduled time {sched_time}")
+                servo_write(self.servo, 180)
+                self.is_open = True
+                self.open_timestamp = time.ticks_ms()
+                self.last_triggered_times.add(sched_time)
+                break
 
         # Close after duration
         if self.is_open and self.open_timestamp is not None:
@@ -65,16 +78,13 @@ class TimedServo:
                 self.open_timestamp = None
                 print("Servo CLOSED after", self.open_duration_s, "seconds.")
 
-    def set_open_times(self, time_list):
-        self.open_times = time_list
-        self.last_triggered_times.clear()
+    def set_open_time1(self, time_str):
+        self.open_time1 = time_str
+        self.last_triggered_times.discard(time_str)  # Reset trigger
+
+    def set_open_time2(self, time_str):
+        self.open_time2 = time_str
+        self.last_triggered_times.discard(time_str)  # Reset trigger
 
     def set_open_duration(self, duration_s):
         self.open_duration_s = duration_s
-
-    def sync_time(self):
-        try:
-            ntptime.settime()
-            print("Time synced with NTP.")
-        except:
-            print("Failed to sync time.")

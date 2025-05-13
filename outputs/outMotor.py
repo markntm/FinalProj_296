@@ -23,15 +23,19 @@ def time_str(tm):
 
 
 class TimedMotorDoor:
-    def __init__(self, pin1, pin2, gate=None, total_chickens=7, open_times=["06:30", "17:00"],
+    def __init__(self, pin1, pin2, gate=None, total_chickens=7,
+                 open_time1="06:30", open_time2="17:00",
                  motor_run_time_s=5, close_delay_s=60, grace_period_s=90):
         self.motor1 = machine.Pin(pin1, machine.Pin.OUT)
         self.motor2 = machine.Pin(pin2, machine.Pin.OUT)
 
-        self.gate = gate  # allows communication to gate members
+        self.gate = gate
         self.total_chickens = total_chickens
 
-        self.open_times = open_times
+        self.open_time1 = open_time1
+        self.open_time2 = open_time2
+        self.open_times = [open_time1, open_time2]
+
         self.motor_run_time_s = motor_run_time_s
         self.close_delay_s = close_delay_s
         self.grace_period_s = grace_period_s
@@ -107,6 +111,14 @@ class TimedMotorDoor:
                 self.state = "idle"
                 print("Door fully closed")
 
-    def set_open_times(self, times):
-        self.open_times = times
+    def set_open_time1(self, time_str):
+        self.open_time1 = time_str
+        self._refresh_open_times()
+
+    def set_open_time2(self, time_str):
+        self.open_time2 = time_str
+        self._refresh_open_times()
+
+    def _refresh_open_times(self):
+        self.open_times = [self.open_time1, self.open_time2]
         self.last_triggered.clear()
