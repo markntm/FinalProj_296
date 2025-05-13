@@ -6,7 +6,6 @@ SERVER_PORT = 8000
 BUFFER_SIZE = 1024
 
 # Default Parameters
-photo_resistor = None
 water_level = None
 gate = None
 motor = None
@@ -24,11 +23,6 @@ sensor_cache = {
     "low": "?",
     "empty": "?",
 
-    "is_day": "?",
-    "sunrise_time": "?",
-    "sunset_time": "?",
-    "light_threshold": "?",
-
     "motor_door_state": "?",
     "motor_open_time1": "?",
     "motor_open_time2": "?",
@@ -39,10 +33,9 @@ sensor_cache = {
 }
 
 
-def setup_devices(pr, wl, g, m, s):
+def setup_devices(wl, g, m, s):
     """Link the devices to the server module."""
-    global photo_resistor, water_level, gate, motor, servo
-    photo_resistor = pr
+    global water_level, gate, motor, servo
     water_level = wl
     gate = g
     motor = m
@@ -81,14 +74,6 @@ def webpage():
     html += "<p>Empty Water Level: " + str(sensor_cache["empty"]) + " cm</p>"
     html += ('<form action="/calibrate_low_water_level"><button type="submit">Calibrate Low Water Threshold</button></form><br>')
     html += ('<form action="/calibrate_empty_water_level"><button type="submit">Calibrate Empty Water Threshold</button></form><br>')
-
-    # Light Level Tracker Section
-    html += "<h2>Light Level Tracker</h2>"
-    html += "<p>Currently Daytime: " + str(sensor_cache["is_day"]) + "</p>"
-    html += "<p>Sunrise Time: " + str(sensor_cache["sunrise_time"]) + "</p>"
-    html += "<p>Sunset Time: " + str(sensor_cache["sunset_time"]) + "</p>"
-    html += "<p>Day-Night Threshold: " + str(sensor_cache["light_threshold"]) + "</p>"
-    html += '<form action="/init_photo"><button type="submit">Calibrate Day-Night Threshold</button></form><br>'
 
     # Motor door Tracker Section
     html += "<h2>Motor Door</h2>"

@@ -1,7 +1,7 @@
 import _thread
 import time
 from server_client import server
-from inputs import inpPhotoresistor, inpSONARSensor, inpWaterLevelSensor
+from inputs import inpSONARSensor, inpWaterLevelSensor
 from outputs import outRGBLED, outServo, outMotor
 
 
@@ -12,7 +12,6 @@ pins = {
     "B-LED pin": 0,
     "motor1 pin": 0,
     "motor2 pin": 0,
-    "photo-resistor pin": 0,
     "water-level pin": 0,
     "sonar inner-TRIG pin": 0,
     "sonar inner-ECHO pin": 0,
@@ -21,14 +20,13 @@ pins = {
 }
 
 
-def core0_main(photo_resistor, water_level, gate, rgb_led, servo, motor_door):
+def core0_main(water_level, gate, rgb_led, servo, motor_door):
     """Do Readings"""
     print("Core 0 Reading: On")
     gate.calibrate_sensors()
 
     while True:
         # running sensor programs
-        photo_resistor.update()
         water_level.update()
         gate.update()
         rgb_led.update()
@@ -65,7 +63,7 @@ def core0_main(photo_resistor, water_level, gate, rgb_led, servo, motor_door):
 
 def core1_server():
     """Onboard Program to Communicate with client over Wi-Fi"""
-    server.setup_devices(photo_resistor, water_level, gate, motor_door, servo)
+    server.setup_devices(water_level, gate, motor_door, servo)
     server.run_server()
 
 
@@ -77,9 +75,6 @@ if __name__ == '__main__':
     )
     servo = outServo.TimedServo(
         pin=pins["servo pin"]
-    )
-    photo_resistor = inpPhotoresistor.Photoresistor(
-        pin=pins['photo-resistor pin']
     )
     water_level = inpWaterLevelSensor.WaterLevelSensor(
         pin=pins['water-level pin']
@@ -97,4 +92,4 @@ if __name__ == '__main__':
     )
 
     _thread.start_new_thread(core1_server, ())
-    core0_main(photo_resistor, water_level, gate, rgb_led, servo, motor_door)
+    core0_main(water_level, gate, rgb_led, servo, motor_door)

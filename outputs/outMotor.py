@@ -34,7 +34,6 @@ class TimedMotorDoor:
 
         self.open_time1 = open_time1
         self.open_time2 = open_time2
-        self.open_times = [open_time1, open_time2]
 
         self.motor_run_time_s = motor_run_time_s
         self.close_delay_s = close_delay_s
@@ -71,8 +70,8 @@ class TimedMotorDoor:
         if now_str == "00:00":
             self.last_triggered.clear()
 
-        # Check for scheduled opening
-        for sched in self.open_times:
+        # Check each scheduled time
+        for sched in (self.open_time1, self.open_time2):
             h, m = map(int, sched.split(":"))
             sched_seconds = h * 3600 + m * 60
 
@@ -85,7 +84,7 @@ class TimedMotorDoor:
                     print(f"Door opening at {now_str}")
                     return
 
-        # Motor state transitions
+        # State transitions
         if self.state == "opening":
             if time.ticks_diff(time.ticks_ms(), self.action_start_time) >= self.motor_run_time_s * 1000:
                 self.stop_motor()
@@ -94,7 +93,6 @@ class TimedMotorDoor:
                 print("Door fully open")
 
         elif self.state == "waiting_to_close":
-            # Wait until all chickens are in before closing
             if self.gate and self.gate.inside_count < self.total_chickens:
                 print(f"Waiting for chickens... ({self.gate.inside_count}/{self.total_chickens} inside)")
                 return
@@ -113,12 +111,8 @@ class TimedMotorDoor:
 
     def set_open_time1(self, time_str):
         self.open_time1 = time_str
-        self._refresh_open_times()
+        self.last_triggered.clear()
 
     def set_open_time2(self, time_str):
         self.open_time2 = time_str
-        self._refresh_open_times()
-
-    def _refresh_open_times(self):
-        self.open_times = [self.open_time1, self.open_time2]
         self.last_triggered.clear()

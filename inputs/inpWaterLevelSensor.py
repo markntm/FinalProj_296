@@ -8,7 +8,7 @@ class WaterLevelSensor:
         self.empty_threshold = empty_threshold
         self.low_threshold = low_threshold 
         self.level = 0
-        self.status = "unknown"  # set to enum
+        self.status = "unknown"
 
     def read(self):
         return (4/1023) * self.sensor.read_u16()
