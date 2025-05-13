@@ -3,7 +3,7 @@ import time
 
 
 class WaterLevelSensor:
-    def __init__(self, pin, empty_threshold=1000, low_threshold=5000):
+    def __init__(self, pin, empty_threshold=1, low_threshold=2):
         self.sensor = ADC(pin)
         self.empty_threshold = empty_threshold
         self.low_threshold = low_threshold 
@@ -11,7 +11,7 @@ class WaterLevelSensor:
         self.status = "unknown"  # set to enum
 
     def read(self):
-        return self.sensor.read_u16()
+        return (4/1023) * self.sensor.read_u16()
 
     def get_status(self):
         return self.status
